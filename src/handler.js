@@ -69,16 +69,37 @@ const addBookHandler = (request, h) => {
   return response;
 };
 
-const getAllBookHandler = () => ({
-  status: 'success',
-  data: {
-    books: books.map((book) => ({
-      id: book.id,
-      name: book.name,
-      publisher: book.publisher,
-    })),
-  },
-});
+const getAllBookHandler = (request, h) => {
+  const { name, reading, finished } = request.query;
+  const returnBooks = books;
+  if (name || reading || finished) {
+    return h.response({
+      status: 'success',
+      data: {
+        books: returnBooks.filter((q) => {
+          if (name) return q.name.toLowerCase().includes(name.toLowerCase());
+          if (reading) return (reading === '0' || reading === '1') ? q.reading === (reading === '1') : q;
+          return (finished === '0' || finished === '1') ? q.finished === (finished === '1') : q;
+        }).map((book) => ({
+          id: book.id,
+          name: book.name,
+          publisher: book.publisher,
+        })),
+      },
+    });
+  }
+
+  return h.response({
+    status: 'success',
+    data: {
+      books: books.map((book) => ({
+        id: book.id,
+        name: book.name,
+        publisher: book.publisher,
+      })),
+    },
+  });
+};
 
 const getDetailBookHandler = (request, h) => {
   const { bookId } = request.params;
@@ -159,9 +180,30 @@ const updateBookHandler = (request, h) => {
   return response;
 };
 
+const deleteBookHandler = (request, h) => {
+  const { bookId } = request.params;
+  const index = books.findIndex((book) => book.id === bookId);
+  if (index !== -1) {
+    books.splice(index, 1);
+    const response = h.response({
+      status: 'success',
+      message: 'Buku berhasil dihapus',
+    });
+    response.code(200);
+    return response;
+  }
+  const response = h.response({
+    status: 'fail',
+    message: 'Buku gagal dihapus. Id tidak ditemukan',
+  });
+  response.code(404);
+  return response;
+};
+
 module.exports = {
   addBookHandler,
   getAllBookHandler,
   getDetailBookHandler,
   updateBookHandler,
+  deleteBookHandler,
 };
