@@ -71,28 +71,33 @@ const addBookHandler = (request, h) => {
 
 const getAllBookHandler = (request, h) => {
   const { name, reading, finished } = request.query;
-  const returnBooks = books;
-  if (name || reading || finished) {
-    return h.response({
-      status: 'success',
-      data: {
-        books: returnBooks.filter((q) => {
+  const filteredBook = books.filter((q) => {
           if (name) return q.name.toLowerCase().includes(name.toLowerCase());
           if (reading) return (reading === '0' || reading === '1') ? q.reading === (reading === '1') : q;
-          return (finished === '0' || finished === '1') ? q.finished === (finished === '1') : q;
-        }).map((book) => ({
-          id: book.id,
-          name: book.name,
-          publisher: book.publisher,
-        })),
-      },
-    });
-  }
+          if (finished) return (finished === '0' || finished === '1') ? q.finished === (finished === '1') : q;
+          return q;
+        });
+//   if (name || reading || finished) {
+//     return h.response({
+//       status: 'success',
+//       data: {
+//         books: returnBooks.filter((q) => {
+//           if (name) return q.name.toLowerCase().includes(name.toLowerCase());
+//           if (reading) return (reading === '0' || reading === '1') ? q.reading === (reading === '1') : q;
+//           return (finished === '0' || finished === '1') ? q.finished === (finished === '1') : q;
+//         }).map((book) => ({
+//           id: book.id,
+//           name: book.name,
+//           publisher: book.publisher,
+//         })),
+//       },
+//     });
+//   }
 
   return h.response({
     status: 'success',
     data: {
-      books: books.map((book) => ({
+      books: filteredBook.map((book) => ({
         id: book.id,
         name: book.name,
         publisher: book.publisher,
